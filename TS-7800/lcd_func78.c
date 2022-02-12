@@ -453,12 +453,12 @@ int main(void)
 				break;
 			case 'p':
 				temp = 0x21;
-				for(i = 0;i < 200;i++)
+				for(i = 0;i < 5000;i++)
 				{
 					write_serial3(temp);
 					if(++temp > 0x7f)
 						temp = 0x21;
-					DELAY5();
+					DELAY1();
 				}
 				break;
 			case 'u':

@@ -86,7 +86,8 @@ static 	uint8_t rdata[DATA_SIZE];
 osThreadId defaultTaskHandle;
 osThreadId myTask02Handle;
 osThreadId myTask03Handle;
-uint16_t value_dac = 0;
+float value = 0.2;
+uint32_t var;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -309,36 +310,35 @@ void StartTask02(void const * argument)
 */
 	for(;;)
 	{
-		HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, value_dac);
-		if(value_dac < 4095)
+		var = value*(0xfff+1)/3.3;
+		HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, var);
+		value += 0.1;
+		vTaskDelay(20);
+		if(value > 3)
+			value = 0.2;
+
+		if(menu_ptr == 0)
 		{
-			value_dac++;
-		}
-		else
+			HAL_GPIO_WritePin(GPIOD, LED1_Pin, GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(GPIOD, LED2_Pin, GPIO_PIN_SET);
+			menu_ptr = 1;
+		}else if(menu_ptr == 1)
 		{
-			value_dac = 0;
-			if(menu_ptr == 0)
-			{
-				HAL_GPIO_WritePin(GPIOD, LED1_Pin, GPIO_PIN_RESET);
-				HAL_GPIO_WritePin(GPIOD, LED2_Pin, GPIO_PIN_SET);
-				menu_ptr = 1;
-			}else if(menu_ptr == 1)
-			{
-				HAL_GPIO_WritePin(GPIOD, LED2_Pin, GPIO_PIN_RESET);
-				HAL_GPIO_WritePin(GPIOD, LED3_Pin, GPIO_PIN_SET);
-				menu_ptr = 2;
-			}else if(menu_ptr == 2)
-			{
-				HAL_GPIO_WritePin(GPIOD, LED3_Pin, GPIO_PIN_RESET);
-				HAL_GPIO_WritePin(GPIOD, LED4_Pin, GPIO_PIN_SET);
-				menu_ptr = 3;
-			}else if(menu_ptr == 3)
-			{
-				HAL_GPIO_WritePin(GPIOD, LED4_Pin, GPIO_PIN_RESET);
-				HAL_GPIO_WritePin(GPIOD, LED1_Pin, GPIO_PIN_SET);
-				menu_ptr = 0;
-			}
+			HAL_GPIO_WritePin(GPIOD, LED2_Pin, GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(GPIOD, LED3_Pin, GPIO_PIN_SET);
+			menu_ptr = 2;
+		}else if(menu_ptr == 2)
+		{
+			HAL_GPIO_WritePin(GPIOD, LED3_Pin, GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(GPIOD, LED4_Pin, GPIO_PIN_SET);
+			menu_ptr = 3;
+		}else if(menu_ptr == 3)
+		{
+			HAL_GPIO_WritePin(GPIOD, LED4_Pin, GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(GPIOD, LED1_Pin, GPIO_PIN_SET);
+			menu_ptr = 0;
 		}
+		
 		vTaskDelay(1);
 
 	}

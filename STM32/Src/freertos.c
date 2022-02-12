@@ -239,13 +239,13 @@ void StartTask02(void const * argument)
 	uint8_t *pData;
 	uint16_t Size;
 	int menu_ptr = 0;
-	uint8_t xbyte = 0x21;
+	uint8_t xbyte = 0x22;
 
 	for(i = 0;i < DATA_SIZE;i++)
 	{
 		data[i] = xbyte;
-//		if(++xbyte > 0x7f)
-//			xbyte = 0x1f;
+		if(++xbyte > 0x7f)
+			xbyte = 0x1f;
 	}
 	
 	pData = &data[0];
@@ -253,8 +253,8 @@ void StartTask02(void const * argument)
 	vTaskDelay(1000);
 	for(;;)
 	{
-		ret = HAL_UART_Receive(&huart3, pData, Size, 500);
-		vTaskDelay(1);
+//		ret = HAL_UART_Receive(&huart3, pData, Size, 500);
+		vTaskDelay(2);
 		ret = HAL_UART_Transmit(&huart2, pData, Size, 100);
 		vTaskDelay(1);
 

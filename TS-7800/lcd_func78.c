@@ -287,6 +287,7 @@ int main(void)
 	int i,j,key, ii;
 	int level = 0;
 	UCHAR temp, temp2;
+	char errmsg[20];
 
 	i = j = 0;
 
@@ -462,6 +463,13 @@ int main(void)
 				}
 				break;
 			case 'u':
+				printf("reading comm3\n");
+//				for(i = 0;i < 5000;i++)
+				while(1)
+				{
+					temp = read_serial3(errmsg);
+					printf("%c",temp);
+				}
 				break;
 			case 't':
 				break;

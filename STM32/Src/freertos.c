@@ -253,7 +253,7 @@ void StartTask02(void const * argument)
 	vTaskDelay(1000);
 	for(;;)
 	{
-//		ret = HAL_UART_Receive(&huart3, pData, Size, 500);
+		ret = HAL_UART_Receive(&huart2, pData, Size, 500);
 		vTaskDelay(2);
 		ret = HAL_UART_Transmit(&huart2, pData, Size, 100);
 		vTaskDelay(1);

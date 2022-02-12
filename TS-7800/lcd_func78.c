@@ -454,12 +454,22 @@ int main(void)
 				break;
 			case 'p':
 				temp = 0x21;
-				for(i = 0;i < 5000;i++)
+				printf("testing w/r\n");
+				while(1)
 				{
-					write_serial3(temp);
-					if(++temp > 0x7f)
-						temp = 0x21;
-					DELAY1();
+					for(i = 0;i < 500;i++)
+					{
+						write_serial3(temp);
+						if(++temp > 0x7f)
+							temp = 0x21;
+						DELAY1();
+					}
+					for(i = 0;i < 500;i++)
+					{
+						temp = read_serial3(errmsg);
+						printf("%c",temp);
+					}
+					printf("\n");
 				}
 				break;
 			case 'u':

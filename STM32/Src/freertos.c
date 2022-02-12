@@ -259,7 +259,7 @@ void StartTask02(void const * argument)
 	HAL_GPIO_WritePin(GPIOD, LED1_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(GPIOD, LED2_Pin, GPIO_PIN_SET);
 
-	vTaskDelay(1000);
+	vTaskDelay(100);
 
 //	HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
 	HAL_TIM_Base_Start(&htim2);
@@ -267,7 +267,7 @@ void StartTask02(void const * argument)
 	get_sineval();
 
 	HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2, sine_val, 100, DAC_ALIGN_12B_R);
-	vTaskDelay(1000);
+	vTaskDelay(100);
 			
 /*
 	for(i = 0;i < DATA_SIZE;i++)

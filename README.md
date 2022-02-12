@@ -12,3 +12,5 @@ things to try:
 1) GPS chip from STM32 
 2) DAC output of STM32 
 3) math on FPGA 
+4) have FPGA send sample data for STM32 to process as EFI algo.
+	a) 

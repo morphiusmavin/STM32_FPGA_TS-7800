@@ -88,8 +88,6 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define DAC_Pin GPIO_PIN_4
-#define DAC_GPIO_Port GPIOA
 #define SPI1_SS_Pin GPIO_PIN_4
 #define SPI1_SS_GPIO_Port GPIOC
 #define SPI2_SS_Pin GPIO_PIN_5

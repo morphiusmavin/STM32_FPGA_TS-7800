@@ -58,6 +58,7 @@
 /* USER CODE BEGIN Includes */     
 #include "spi.h"
 #include "usart.h"
+#include "dac.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -85,6 +86,7 @@ static 	uint8_t rdata[DATA_SIZE];
 osThreadId defaultTaskHandle;
 osThreadId myTask02Handle;
 osThreadId myTask03Handle;
+uint16_t value_dac = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -241,6 +243,16 @@ void StartTask02(void const * argument)
 	int menu_ptr = 0;
 	uint8_t xbyte = 0x22;
 
+	HAL_GPIO_WritePin(GPIOD, LED1_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOD, LED2_Pin, GPIO_PIN_SET);
+
+	vTaskDelay(1000);
+
+	HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
+
+	vTaskDelay(1000);
+			
+/*
 	for(i = 0;i < DATA_SIZE;i++)
 	{
 		data[i] = xbyte;
@@ -294,28 +306,41 @@ void StartTask02(void const * argument)
 			ret = HAL_UART_Transmit(&huart2, pData, Size, 100);
 		}
 		vTaskDelay(1);
-
-		if(menu_ptr == 0)
+*/
+	for(;;)
+	{
+		HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, value_dac);
+		if(value_dac < 4095)
 		{
-			HAL_GPIO_WritePin(GPIOD, LED1_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(GPIOD, LED2_Pin, GPIO_PIN_SET);
-			menu_ptr = 1;
-		}else if(menu_ptr == 1)
-		{
-			HAL_GPIO_WritePin(GPIOD, LED2_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(GPIOD, LED3_Pin, GPIO_PIN_SET);
-			menu_ptr = 2;
-		}else if(menu_ptr == 2)
-		{
-			HAL_GPIO_WritePin(GPIOD, LED3_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(GPIOD, LED4_Pin, GPIO_PIN_SET);
-			menu_ptr = 3;
-		}else if(menu_ptr == 3)
-		{
-			HAL_GPIO_WritePin(GPIOD, LED4_Pin, GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(GPIOD, LED1_Pin, GPIO_PIN_SET);
-			menu_ptr = 0;
+			value_dac++;
 		}
+		else
+		{
+			value_dac = 0;
+			if(menu_ptr == 0)
+			{
+				HAL_GPIO_WritePin(GPIOD, LED1_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(GPIOD, LED2_Pin, GPIO_PIN_SET);
+				menu_ptr = 1;
+			}else if(menu_ptr == 1)
+			{
+				HAL_GPIO_WritePin(GPIOD, LED2_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(GPIOD, LED3_Pin, GPIO_PIN_SET);
+				menu_ptr = 2;
+			}else if(menu_ptr == 2)
+			{
+				HAL_GPIO_WritePin(GPIOD, LED3_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(GPIOD, LED4_Pin, GPIO_PIN_SET);
+				menu_ptr = 3;
+			}else if(menu_ptr == 3)
+			{
+				HAL_GPIO_WritePin(GPIOD, LED4_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(GPIOD, LED1_Pin, GPIO_PIN_SET);
+				menu_ptr = 0;
+			}
+		}
+		vTaskDelay(1);
+
 	}
   /* USER CODE END StartTask02 */
 }

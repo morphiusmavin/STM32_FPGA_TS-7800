@@ -59,6 +59,8 @@
 #include "spi.h"
 #include "usart.h"
 #include "dac.h"
+#include "math.h"
+#include "tim.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -73,7 +75,15 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+uint32_t sine_val[100];
+#define PI 3.1415926
+void get_sineval()
+{
+	for(int i= 0;i < 100;i++)
+	{
+		sine_val[i] = ((sin(i*2*PI/100) + 1)*(4096/2));
+	}
+}
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -81,13 +91,13 @@
 #define DATA_SIZE 500
 static 	uint8_t data[DATA_SIZE];
 static 	uint8_t rdata[DATA_SIZE];
+float value = 0.2;
+uint32_t var;
 
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
 osThreadId myTask02Handle;
 osThreadId myTask03Handle;
-float value = 0.2;
-uint32_t var;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -237,20 +247,26 @@ void StartTask02(void const * argument)
 {
   /* USER CODE BEGIN StartTask02 */
   /* Infinite loop */
+/*
 	HAL_StatusTypeDef ret;
 	int i,j;
 	uint8_t *pData;
 	uint16_t Size;
-	int menu_ptr = 0;
 	uint8_t xbyte = 0x22;
+*/
+	int menu_ptr = 0;
 
 	HAL_GPIO_WritePin(GPIOD, LED1_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(GPIOD, LED2_Pin, GPIO_PIN_SET);
 
 	vTaskDelay(1000);
 
-	HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
+//	HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
+	HAL_TIM_Base_Start(&htim2);
 
+	get_sineval();
+
+	HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2, sine_val, 100, DAC_ALIGN_12B_R);
 	vTaskDelay(1000);
 			
 /*
@@ -310,13 +326,14 @@ void StartTask02(void const * argument)
 */
 	for(;;)
 	{
+/*
 		var = value*(0xfff+1)/3.3;
 		HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, var);
 		value += 0.1;
 		vTaskDelay(20);
 		if(value > 3)
 			value = 0.2;
-
+*/
 		if(menu_ptr == 0)
 		{
 			HAL_GPIO_WritePin(GPIOD, LED1_Pin, GPIO_PIN_RESET);
@@ -339,7 +356,7 @@ void StartTask02(void const * argument)
 			menu_ptr = 0;
 		}
 		
-		vTaskDelay(1);
+		vTaskDelay(100);
 
 	}
   /* USER CODE END StartTask02 */

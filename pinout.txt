@@ -1,0 +1,55 @@
+MOSI_i"		P96			light blue
+MISO_o"		P98			red
+SCLK_i"		P100		blue
+SS_i"		P106
+TRIGGER"	P108		yellow
+
+100	99	bottom left 
+98	97  looking at underneath
+96	94
+93	90	these are not on DKV600
+
+# pin #'s on lower row starting from bottom (16I/Os_2 on DKV600)
+#96		starting from bottom right going up
+#98
+#100
+#106
+#108
+
+STM: 
+
+(SPI1 master)
+MOSI	PA7
+MISO	PA6
+SCLK	PB3
+SS		PC4
+
+(SPI2 slave)
+MOSI	PC3
+MISO	PC2
+SCLK	PB10
+SS		PC5
+
+(SPI3 slave)
+MOSI	PC12
+MISO	PC11
+SCLK	PC10
+SS		(nc)
+
+TRIG	PB7
+
+STM usart
+
+usart2: 
+TX	PA2
+RX	PA3
+
+usart3:
+TX	PD8
+RX	PB11
+
+COM2 on TS-7800
+1 2 3 4 5 (row near the edge)
+2 RX 
+3 TX 
+5 GND

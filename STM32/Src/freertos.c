@@ -249,13 +249,50 @@ void StartTask02(void const * argument)
 	}
 	
 	pData = &data[0];
-	Size = DATA_SIZE;
+//	Size = DATA_SIZE;
 	vTaskDelay(1000);
 	for(;;)
 	{
-		ret = HAL_UART_Receive(&huart2, pData, Size, 500);
+		Size = 1;
+		ret = HAL_UART_Receive(&huart2, &xbyte, Size, 5000);
 		vTaskDelay(2);
-		ret = HAL_UART_Transmit(&huart2, pData, Size, 100);
+		if(ret != HAL_TIMEOUT)
+		{
+			switch(xbyte)
+			{
+				case 0xFD:
+					xbyte = 0x21;
+					for(i = 0;i < DATA_SIZE;i++)
+					{
+						data[i] = xbyte;
+						if(++xbyte > 0x7f)
+							xbyte = 0x1f;
+					}
+				break;
+				case 0xFE:
+					xbyte = 0x7F;
+					for(i = 0;i < DATA_SIZE;i++)
+					{
+						data[i] = xbyte;
+						if(--xbyte < 0x21)
+							xbyte = 0x7f;
+					}
+				break;
+				case 0xFC:
+					xbyte = 0x30;
+					for(i = 0;i < DATA_SIZE/2;i++)
+					{
+						data[i] = xbyte;
+						if(++xbyte > 0x7f)
+							xbyte = 0x30;
+					}
+				break;
+				default:
+				break;
+			}
+			Size = DATA_SIZE;
+			ret = HAL_UART_Transmit(&huart2, pData, Size, 100);
+		}
 		vTaskDelay(1);
 
 		if(menu_ptr == 0)

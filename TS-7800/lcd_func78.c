@@ -482,10 +482,28 @@ int main(void)
 				}
 				break;
 			case 't':
+				write_serial3(0xFE);
+				for(i = 0;i < 500;i++)
+				{
+					temp = read_serial3(errmsg);
+					printf("%c",temp);
+				}
 				break;
 			case 'v':
+				write_serial3(0xFD);
+				for(i = 0;i < 500;i++)
+				{
+					temp = read_serial3(errmsg);
+					printf("%c",temp);
+				}
 				break;
 			case 'w':
+				write_serial3(0xFC);
+				for(i = 0;i < 500;i++)
+				{
+					temp = read_serial3(errmsg);
+					printf("%c",temp);
+				}
 				break;
 			case '1':
 				break;

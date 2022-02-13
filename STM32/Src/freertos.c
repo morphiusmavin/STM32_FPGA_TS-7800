@@ -269,7 +269,7 @@ void StartTask02(void const * argument)
 	HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_2, sine_val, 100, DAC_ALIGN_12B_R);
 	vTaskDelay(100);
 			
-/*
+
 	for(i = 0;i < DATA_SIZE;i++)
 	{
 		data[i] = xbyte;
@@ -279,7 +279,7 @@ void StartTask02(void const * argument)
 	
 	pData = &data[0];
 //	Size = DATA_SIZE;
-	vTaskDelay(1000);
+	vTaskDelay(100);
 	for(;;)
 	{
 		Size = 1;
@@ -323,17 +323,7 @@ void StartTask02(void const * argument)
 			ret = HAL_UART_Transmit(&huart2, pData, Size, 100);
 		}
 		vTaskDelay(1);
-*/
-	for(;;)
-	{
-/*
-		var = value*(0xfff+1)/3.3;
-		HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, var);
-		value += 0.1;
-		vTaskDelay(20);
-		if(value > 3)
-			value = 0.2;
-*/
+
 		if(menu_ptr == 0)
 		{
 			HAL_GPIO_WritePin(GPIOD, LED1_Pin, GPIO_PIN_RESET);
@@ -355,10 +345,9 @@ void StartTask02(void const * argument)
 			HAL_GPIO_WritePin(GPIOD, LED1_Pin, GPIO_PIN_SET);
 			menu_ptr = 0;
 		}
-		
-		vTaskDelay(100);
-
 	}
+
+
   /* USER CODE END StartTask02 */
 }
 

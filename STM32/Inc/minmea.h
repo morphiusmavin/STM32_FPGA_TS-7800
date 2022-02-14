@@ -37,7 +37,15 @@ extern "C" {
 
 //#define NAN -1
 
+};
+
 enum minmea_sentence_id {
+	STRICT_ERROR = -7,
+	CHECKSUM_ERROR = -6,
+	LOWER_ERROR = -5,
+	UPPER_ERROR = -4,
+	STARTS_WITH_ERROR = -3,
+	SEQ_LEN_ERROR = -2,
     MINMEA_INVALID = -1,
     MINMEA_UNKNOWN = 0,
     MINMEA_SENTENCE_RMC,
@@ -48,6 +56,7 @@ enum minmea_sentence_id {
     MINMEA_SENTENCE_GSV,
     MINMEA_SENTENCE_VTG,
     MINMEA_SENTENCE_ZDA,
+	NO_ERROR,
 };
 
 struct minmea_float {
@@ -185,7 +194,7 @@ uint8_t minmea_checksum(const char *sentence);
 /**
  * Check sentence validity and checksum. Returns true for valid sentences.
  */
-bool minmea_check(const char *sentence, bool strict);
+int minmea_check(const char *sentence, bool strict);
 
 /**
  * Determine talker identifier.

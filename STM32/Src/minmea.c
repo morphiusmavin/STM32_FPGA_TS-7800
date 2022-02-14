@@ -42,7 +42,7 @@ uint8_t minmea_checksum(const char *sentence)
     return checksum;
 }
 
-bool minmea_check(const char *sentence, bool strict)
+enum minmea_sentence_id minmea_check(const char *sentence, bool strict)
 {
     uint8_t checksum = 0x00;
 	int string_len;
@@ -51,14 +51,14 @@ bool minmea_check(const char *sentence, bool strict)
     if ((string_len = strlen(sentence)) > MINMEA_MAX_LENGTH + 3)
 	{
 		//printf("seq len ");
-        return false;
+        return SEQ_LEN_ERROR;
 	}
 
     // A valid sentence starts with "$".
     if (*sentence++ != '$')
 	{
 //		printf("starts with...\r\n");
-        return false;
+        return STARTS_WITH_ERROR;
 	}
 
     // The optional checksum is an XOR of all bytes between "$" and "*".
@@ -76,15 +76,15 @@ bool minmea_check(const char *sentence, bool strict)
         int upper = hex2int(*sentence++);
         if (upper == -1)
 		{
-			printf(" upper ");
-            return false;
+//			printf(" upper ");
+            return UPPER_ERROR;
 		}
 //		printf("upper: %d\n",upper);
         int lower = hex2int(*sentence++);
         if (lower == -1)
 		{
-			printf("lower ");
-            return false;
+//			printf("lower ");
+            return LOWER_ERROR;
 		}
 //		printf("lower: %d\n",lower);
         int expected = upper << 4 | lower;
@@ -93,15 +93,15 @@ bool minmea_check(const char *sentence, bool strict)
 
         if (checksum != expected)
 		{
-			printf("%d checksum ",string_len);
-			printf("\n%02x %02x ",checksum,expected);
-            return false;
+//			printf("%d checksum ",string_len);
+//			printf("\n%02x %02x ",checksum,expected);
+            return CHECKSUM_ERROR;
 		}
     } else if (strict) 
 	{
         // Discard non-checksummed frames in strict mode.
-		printf("strict ");
-        return false;
+//		printf("strict ");
+        return STRICT_ERROR;
     }
 
     // The only stuff allowed at this point is a newline.
@@ -112,7 +112,7 @@ bool minmea_check(const char *sentence, bool strict)
         return false;
 	}
 */
-    return true;
+    return NO_ERROR;
 }
 
 static inline bool minmea_isfield(char c) {
@@ -390,8 +390,10 @@ bool minmea_talker_id(char talker[3], const char *sentence)
 
 enum minmea_sentence_id minmea_sentence_id(const char *sentence, bool strict)
 {
-    if (!minmea_check(sentence, strict))
-        return MINMEA_INVALID;
+    int error;
+	error = minmea_check(sentence, strict);
+	if (error != NO_ERROR)
+        return error;
 
     char type[6];
     if (!minmea_scan(sentence, "t", type))

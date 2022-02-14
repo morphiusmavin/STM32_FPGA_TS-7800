@@ -53,3 +53,13 @@ COM2 on TS-7800
 2 RX 
 3 TX 
 5 GND
+
+GPS (EM506)
+1 GND 			red		(looking at GPS)
+2 VIN (5v)		black
+3) RX (3.3v)	yellow
+4) TX (3.3v)	white
+5) GND 			blue
+6) Directive 	green (not used)
+
+

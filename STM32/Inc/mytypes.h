@@ -28,31 +28,6 @@ typedef struct _ip
 	char label[OLABELSIZE];
 }IP;
 
-typedef struct
-{
-	float latitude;
-	float longitude;
-	char name[30];
-}WAYPOINTS;
-
-enum dist_units
-{
-	METERS,
-	FEET,
-	MILES,
-	KILOMETERS,
-	YARDS
-}DIST_UNITS;
-
-typedef struct
-{
-	double yards;
-	double miles;
-	double meters;
-	char name[30];
-	int units;
-}FARRAY;
-
 // msg's sent from client to TS-7200
 enum cmd_types
 {

@@ -61,7 +61,6 @@
 #include "dac.h"
 #include "math.h"
 #include "tim.h"
-#include "minmea.h"
 #include "mytypes.h"
 #include <string.h>
 /* USER CODE END Includes */
@@ -78,20 +77,6 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-extern double getDistance(double lat1, double lon1, double lat2, double lon2, double *yards, double *miles);
-int no_waypoints;
-static struct minmea_sentence_rmc rmc;
-static struct minmea_sentence_gga gga;
-static struct minmea_sentence_gll gll;
-//static struct minmea_sentence_gst gst;
-static struct minmea_sentence_gsv gsv;
-static struct minmea_sentence_vtg vtg;
-static struct minmea_sentence_gsa gsa;
-//static struct minmea_sentence_zda zda;
-
-char directions[16][7] = {"North\0","NNE\0","NE\0","ENE\0","East\0","ESE\0","SE\0","SSE\0","South\0","SSW\0","SW\0","WSW\0","West\0","WNW\0","NW\0","NNW\0"};
-
-static char gps_strings[20][80];
 
 /*
 uint32_t sine_val[100];
@@ -391,169 +376,12 @@ void StartTask03(void const * argument)
 
 	/* Infinite loop */
 		
-	UCHAR ch;
-	int i,k;
-	FARRAY fa[45];		// this should be big enough to store all the waypoints in wp[]
-	double curr_lat, curr_long;
-	double mdistance1, mdistance2;
-	int closest_wp, next_closest_wp;
-	int error_count = 0;
-	int br_try = 0;
-	char tempx[200];
-	char tempy[30];
-	char errmsg[30];
-	UCHAR ucbuff[20];
-	int no_recs;
-	double tfloat;
-	closest_wp = next_closest_wp = 0;
-	int start_wp = 0;
-	int end_wp;
-	int wp_range = 6;
-	
-	struct minmea_sentence_rmc *prmc = &rmc;
-	struct minmea_sentence_gga *pgga = &gga;
-	struct minmea_sentence_gll *pgll = &gll;
-//	struct minmea_sentence_gst *pgst = &gst;
-	struct minmea_sentence_gsv *pgsv = &gsv;
-	struct minmea_sentence_vtg *pvtg = &vtg;
-	struct minmea_sentence_gsa *pgsa = &gsa;
-//	struct minmea_sentence_gsa *pzda = &zda;
-
 	int ret_val = -1;
 	static int onoff = 0;
-	void *vstruct;
-
-	k = 0;
 
 	while(TRUE)
 	{
-		do
-		{
-			i++;
-			vTaskDelay(1);
-			ret = HAL_UART_Receive(&huart3, &rdata[0], Size, 100);
-			vTaskDelay(1);
-//			if(tempx[i] < 0)
-//				printf("%s\r\n",errmsg);
-//			printf("%c",tempx[i]);
- 		}while(i < 200 && tempx[i] != 0x0D && tempx[i-1] != 0x0A && tempx[i] < 0x7e);	
-		// if CRLF, quit
-
-		ret_val = minmea_sentence_id(tempx, false);
-//		sprintf(tempx,"%d %d",ret_val,i);
-//		myprintf1(tempx);
-
-		switch(ret_val)
-		{
-			// recommended minimum specific data
-			// time, date, lat/long, speed, direction
-			case MINMEA_SENTENCE_RMC:
-				if(get_rmc_frame(tempx, prmc) > 0)
-				{
-					error_count = 0;
-					memset(tempx,0,sizeof(tempx));
-					sprintf(tempy,"%.4f,\0",(curr_lat = minmea_tocoord(&rmc.latitude)));
-					//printf("%s\r\n",tempy);
-					memset(ucbuff,0,sizeof(ucbuff));
-					memcpy(ucbuff,tempy,strlen(tempy)-1);
-//					send_lcd(ucbuff,strlen(tempy)+5);
-					vTaskDelay(1);
-					strcat(tempx,tempy);
-
-					sprintf(tempy,"%.4f,\0",(curr_long = minmea_tocoord(&rmc.longitude)));
-					//printf("%s\r\n",tempy);
-					memset(ucbuff,0,sizeof(ucbuff));
-					memcpy(ucbuff,tempy,strlen(tempy)-1);
-//					send_lcd(ucbuff,strlen(tempy)+5);
-					vTaskDelay(1);
-					strcat(tempx,tempy);
-
-					sprintf(tempy,"%.1f,\0",minmea_tofloat(&rmc.speed));
-					//printf("%s\r\n",tempy);
-					memset(ucbuff,0,sizeof(ucbuff));
-					memcpy(ucbuff,tempy,strlen(tempy)-1);
-//					send_lcd(ucbuff,strlen(tempy)+5);
-					vTaskDelay(1);
-					strcat(tempx,tempy);
-
-					tfloat = minmea_tofloat(&rmc.course);
-					i = (int)tfloat/24.0;
-					//printf("%d: %.2f %s\r\n",i,tfloat,directions[i]);
-					sprintf(tempy,"%s,\0",directions[i]);
-					memset(ucbuff,0,sizeof(ucbuff));
-					memcpy(ucbuff,tempy,strlen(tempy)-1);
-//					send_lcd(ucbuff,strlen(tempy)+5);
-					strcat(tempx,tempy);
-				}
-				break;
-
-			// system fixed data
-			case MINMEA_SENTENCE_GGA:
-				if(get_gga_frame(tempx, pgga) > 0)
-				{
-					error_count = 0;
-					memset(tempx,0,sizeof(tempy));
-					sprintf(tempx,"%.1f\0",3.2808*minmea_tofloat(&gga.altitude));
-					//printf("%s\r\n",tempy);
-					memset(ucbuff,0,sizeof(ucbuff));
-					memcpy(ucbuff,tempx,strlen(tempx)-2);
-//					send_lcd(ucbuff,strlen(tempx)+5);
-					sprintf(tempy,",%d,%d,%d\0", gga.time.hours, gga.time.minutes, gga.time.seconds);
-					strcat(tempx, tempy);
-					//myprintf1(tempx);
-					//printf("%s\r\n",tempx);
-				}
-				break;
-
-			// satellites in view
-			case MINMEA_SENTENCE_GSV:
-				if(get_gsv_frame(tempx, pgsv) > 0)
-				{
-					error_count = 0;
-					//sprintf(tempx,"GSV total sats: %d",gsv.total_sats);
-				}
-				break;
-
-			// active satellites
-			case MINMEA_SENTENCE_GSA:
-				if(get_gsa_frame(tempx, pgsa) > 0)
-				{
-					error_count = 0;
-					//sprintf(tempx,"GSA total sats: %d",gsa.fix_type);
-				}
-				break;
-
-			// lat/long, time 
-			case MINMEA_SENTENCE_GLL:
-				if(get_gll_frame(tempx, pgll) > 0)
-				{
-					error_count = 0;
-				}
-				break;
-
-			case MINMEA_SENTENCE_VTG:
-				if(get_vtg_frame(tempx, pvtg) > 0)
-				{
-					error_count = 0;
-/*
-					sprintf(tempx,"VTG true course: %f mag track: %f speed (kph) %f",
-							minmea_tofloat(&vtg.true_track_degrees),
-							minmea_tofloat(&vtg.magnetic_track_degrees),
-							minmea_tofloat(&vtg.speed_kph));
-*/
-				}
-				break;
-
-			case MINMEA_INVALID:
-				if(error_count < 2)
-				error_count++;
-				break;
-
-			default:
-				if(error_count < 2)
-				error_count++;
-				break;
-		}	// end of switch
+		vTaskDelay(100);
 
 		if(menu_ptr == 0)
 		{
